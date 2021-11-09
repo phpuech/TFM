@@ -47,13 +47,14 @@ import os
 # TO BE MODIFIED BY THE USER
 #-----
 # where is the data
-source = '/home/php/Desktop/TFMFINALREG9x10-10ABC1MED15s/Forarticle/aligned'
+source = '/home/php/Desktop/TFMFINALREG9x10-10ABC1MED15s/Forarticle/aligned (copy)'
 new='' #'' #if empty str does not append anything to rep names
 # time btw frames in secs
 dt=5
 # for energy calculation
 vs3=8# pix, last window from calculation in Q.Tseng PIV, see also Martiel 2015 TFM in ImageJ
 pix2um=0.156 # µm/pix, from lens calibration ; 40x AFM 0.156µm/pix
+imagesize=256
 #-----   
 # What do you want to do ?
 CurvesOnly=False # True will only send out the selected curve(s), not the images
@@ -62,10 +63,10 @@ SignalOverImage=True
 Energy=True
 StressCurve='sum' #'sum', 'median', 'mean'
 # Which plots if not CurvesOnly=True ?
-MapDisplVect=False # quiver of vectors of displacement
-HistDisplNorm=False # histograms of displacement norm, same bin size
-MapStressVect=False # quiver of "vectors of stress"
-MapStressNorm=False # discreet map of stress norm
+MapDisplVect=True # quiver of vectors of displacement
+HistDisplNorm=True # histograms of displacement norm, same bin size
+MapStressVect=True # quiver of "vectors of stress"
+MapStressNorm=True # discreet map of stress norm
 decimals=1 #for rounding the x,y axis values
 MapStressNormImage=True # stress norm map as interpolated, smoothed image
 #-----
@@ -75,9 +76,9 @@ Move=False # True, Move the files, while False : keep a copy at original place
  # output parameters for aesthetics of plots and maps
  # for manual setting the color scales of stress maps
  # Stress Heatmap
-maxMap=240 # Pa, for output as a heatmap (discreet image)
+maxMap=160 # Pa, for output as a heatmap (discreet image)
 # Stress Image
-maxImage=240 # Pa, for output map as image
+maxImage=160 # Pa, for output map as image
 Autoscale =False
 SmoothIt='gaussian' # for interpolation on MapStressNormImage 
 '''
@@ -328,10 +329,15 @@ for sub in subdirs:
         
             if MapStressNormImage and not CurvesOnly: #stress norm as an interpolated image
                 fig4=plt.figure('MapStressNormImage', figsize=(inch, inch), dpi=dotperinch)
+                #scale axis to µm
+                xmin=1
+                ymin=1
+                xmax=imagesize/vs3
+                ymax=imagesize/vs3
                 if Autoscale:
-                    ax1=plt.imshow(mapdata, origin='upper',cmap='gist_heat', interpolation=SmoothIt, vmin=0)
+                    ax1=plt.imshow(mapdata, origin='upper',cmap='gist_heat', interpolation=SmoothIt, vmin=0, extent=[xmin *vs3*pix2um, xmax *vs3*pix2um, ymin *vs3*pix2um, ymax *vs3*pix2um])
                 else:
-                    ax1=plt.imshow(mapdata, origin='upper',cmap='gist_heat', interpolation=SmoothIt, vmin=0, vmax=maxImage) # removed : option extend for subsetting image
+                    ax1=plt.imshow(mapdata, origin='upper',cmap='gist_heat', interpolation=SmoothIt, vmin=0, vmax=maxImage, extent=[xmin *vs3*pix2um, xmax *vs3*pix2um, ymin *vs3*pix2um, ymax *vs3*pix2um]) # removed : option extend for subsetting image
                 # check the following lines ----
                 plt.colorbar()
                 #cbar.minorticks_on()
@@ -339,8 +345,8 @@ for sub in subdirs:
                 #scale axis to µm
                 # xmin, xmax = plt.xlim()
                 # ymin, ymax = plt.ylim()
-                # plt.xlim(xmin * pix2um, xmax * pix2um)
-                # plt.ylim(ymin * pix2um, ymax * pix2um)
+                # plt.xlim(xmin *vs3*pix2um, xmax *vs3* pix2um)
+                # plt.ylim(ymin *vs3* pix2um, ymax *vs3* pix2um)
                 plt.xlabel('µm')
                 plt.ylabel('µm')
                 #-------------------------------
