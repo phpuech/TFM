@@ -10,7 +10,7 @@ import numpy as np
 import scipy as sp
 import pandas as pd
 import matplotlib.pyplot as plt
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 import random
 import os
 
@@ -18,6 +18,9 @@ image_size=256 #pix, image will be square
 image_number=10
 particle_number=200
 particle_size=5# pix, radius
+
+gaussian_blur_radius=2 # pix
+image_type="L" #"RGB", "L" for 8bits
 
 option='extension'#'random', 'drift', 'contraction', 'extention'
 
@@ -27,7 +30,7 @@ drift_step=25 #pix/image
 displacement_step=2 #pix/image
 cell_size=50 #radius, pix
 
-output_folder='/home/php/Bureau/test/extension/'
+output_folder='/home/php/Bureau/test/extension-blur15-8bits/'
 
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
@@ -53,7 +56,7 @@ rdy=generate_coordinates(particle_number, particle_size,image_size)
 if option == 'random':
     k=0
     while k < image_number:
-        img=Image.new('RGB', (image_size, image_size))
+        img=Image.new(image_type, (image_size, image_size))
         draw=ImageDraw.Draw(img)
         rdx=generate_coordinates(particle_number, particle_size,image_size)
         rdy=generate_coordinates(particle_number, particle_size,image_size)
@@ -62,7 +65,8 @@ if option == 'random':
             shape=[ (rdx[j], rdy[j]), (rdx[j]+particle_size, rdy[j]+particle_size)]
             draw.ellipse(shape, fill="white", outline="white")
             j=j+1
-        img.save(output_folder+'image'+str(k)+'.tiff')
+        blur=img.filter(ImageFilter.GaussianBlur(radius=gaussian_blur_radius))
+        blur.save(output_folder+'image'+str(k)+'.tiff')
         k=k+1
         
 elif option == 'drift':
@@ -70,14 +74,15 @@ elif option == 'drift':
     rdy=generate_coordinates(particle_number, particle_size,image_size)
     k=0
     while k < image_number:
-        img=Image.new('RGB', (image_size, image_size))
+        img=Image.new(image_type, (image_size, image_size))
         draw=ImageDraw.Draw(img)
         j=0
         while j < particle_number:
             shape=[ (rdx[j]+k*drift_step, rdy[j]+k*drift_step), (rdx[j]+k*drift_step+particle_size, rdy[j]+k*drift_step+particle_size)]
             draw.ellipse(shape, fill="white", outline="white")
             j=j+1
-        img.save(output_folder+'image'+str(k)+'.tiff')
+        blur=img.filter(ImageFilter.GaussianBlur(radius=gaussian_blur_radius))
+        blur.save(output_folder+'image'+str(k)+'.tiff')
         k=k+1
         
 elif option == 'contraction' or 'extention':
@@ -95,7 +100,7 @@ elif option == 'contraction' or 'extention':
     
     k=0
     while k < image_number:
-        img=Image.new('RGB', (image_size, image_size))
+        img=Image.new(image_type, (image_size, image_size))
         draw=ImageDraw.Draw(img)
         j=0
         while j < particle_number:
@@ -111,5 +116,6 @@ elif option == 'contraction' or 'extention':
                 shape=[ (rdx[j], rdy[j]), (rdx[j]+particle_size, rdy[j]+particle_size)]
             draw.ellipse(shape, fill="white", outline="white")
             j=j+1
-        img.save(output_folder+'image'+str(k)+'.tiff')
+        blur=img.filter(ImageFilter.GaussianBlur(radius=gaussian_blur_radius))
+        blur.save(output_folder+'image'+str(k)+'.tiff')
         k=k+1
